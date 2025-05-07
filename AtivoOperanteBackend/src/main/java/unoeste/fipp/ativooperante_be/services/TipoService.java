@@ -18,5 +18,12 @@ public class TipoService {
     public Tipo salvar(Tipo tipo){
         return tipoRepository.save(tipo);
     }
-    //demais métodos para CRUD
+    public boolean delete(Tipo tipo){
+        try{
+            tipoRepository.deleteById(tipo.getId());
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
 }

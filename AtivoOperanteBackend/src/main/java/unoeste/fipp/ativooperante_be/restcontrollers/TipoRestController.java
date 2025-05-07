@@ -34,5 +34,20 @@ public class TipoRestController {
                     new Erro("Erro ao gravar o tipo"));
     }
 
-    //demais endpoints para CRUD de tipo
+    @PutMapping
+    public ResponseEntity<Object> update(@RequestBody Tipo tipo){
+        Tipo tipoAux=tipoService.salvar(tipo);
+        if(tipoAux!=null)
+            return ResponseEntity.ok(tipoAux);
+        else
+            return ResponseEntity.badRequest().body(
+                    new Erro("Erro ao atualizar o tipo"));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Object> delete(@RequestBody Tipo tipo){
+        if(tipoService.delete(tipo))
+            return ResponseEntity.ok().build();
+        return ResponseEntity.badRequest().body("Não foi possivel deletar o tipo");
+    }
 }
