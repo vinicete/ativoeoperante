@@ -26,4 +26,13 @@ public class DenunciaService {
             return false;
         }
     }
+
+    public boolean delete(Denuncia denuncia){
+        try{
+            denunciaRepository.deleteById(denuncia.getId());
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
 }
