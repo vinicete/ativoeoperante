@@ -23,7 +23,9 @@ public class Denuncia {
     @ManyToOne
     @JoinColumn(name = "tip_id",nullable = false)
     private Tipo tipo;
-    //private Usuario usuario;
+    @ManyToOne
+    @JoinColumn(name = "usu_id",nullable = false)
+    private Usuario usuario;
     @OneToOne(mappedBy = "denuncia")
     private FeedBack feedBack;
 
