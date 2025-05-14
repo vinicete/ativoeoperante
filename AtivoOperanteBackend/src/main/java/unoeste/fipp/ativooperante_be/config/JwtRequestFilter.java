@@ -1,39 +1,62 @@
 package unoeste.fipp.ativooperante_be.config;
 
-import io.jsonwebtoken.Jwt;
-import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import unoeste.fipp.ativooperante_be.domain.entities.Usuario;
+import unoeste.fipp.ativooperante_be.repositories.UsuarioRepository;
 
 import java.io.IOException;
+
 @Component
-public class JwtRequestFilter implements Filter {
+public class JwtRequestFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-        // Obtém a requisição HTTP
-        HttpServletRequest req = (HttpServletRequest) request;
+        final String authHeader = request.getHeader("Authorization");
 
-        // Pega o token do cabeçalho Authorization
-        String token = req.getHeader("Authorization");
+        String email = null;
+        String jwt = null;
 
-        // Verifica se o token está presente e é válido
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // Remove o prefixo "Bearer "
-
-            // Valida o token usando a classe JwtUtil
-            if (JwtUtil.verifyToken(token)) {
-                chain.doFilter(request, response);  // Se válido, permite a requisição
-            } else {
-                ((HttpServletResponse) response).setStatus(401);  // Retorna 401 se o token for inválido
-                response.getOutputStream().write("Não autorizado".getBytes());
-            }
-        } else {
-            // Caso o token não esteja presente ou não seja "Bearer", retorna 401
-            ((HttpServletResponse) response).setStatus(401);  // Retorna 401 se não houver token
-            response.getOutputStream().write("Token ausente ou mal formatado".getBytes());
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7);
+            email = JwtUtil.extractUsername(jwt); // você precisa implementar isso
         }
+
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            var usuarioOpt = usuarioRepository.findByEmail(email);
+
+            if (usuarioOpt.isPresent() && JwtUtil.verifyToken(jwt)) {
+                var usuario = usuarioOpt.get();
+
+                var userDetails = org.springframework.security.core.userdetails.User.builder()
+                        .username(usuario.getEmail())
+                        .password(usuario.getSenha())
+                        .roles(String.valueOf(usuario.getNivel()))
+                        .build();
+
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        filterChain.doFilter(request, response);
     }
 }
