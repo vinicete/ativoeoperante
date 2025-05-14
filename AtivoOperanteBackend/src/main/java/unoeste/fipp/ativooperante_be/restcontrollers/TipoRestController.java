@@ -3,8 +3,8 @@ package unoeste.fipp.ativooperante_be.restcontrollers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unoeste.fipp.ativooperante_be.entities.Erro;
-import unoeste.fipp.ativooperante_be.entities.Tipo;
+import unoeste.fipp.ativooperante_be.domain.entities.Erro;
+import unoeste.fipp.ativooperante_be.domain.entities.Tipo;
 import unoeste.fipp.ativooperante_be.services.TipoService;
 
 import java.util.List;

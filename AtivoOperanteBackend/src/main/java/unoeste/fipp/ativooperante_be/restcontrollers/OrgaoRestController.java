@@ -4,7 +4,7 @@ import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unoeste.fipp.ativooperante_be.entities.Orgao;
+import unoeste.fipp.ativooperante_be.domain.entities.Orgao;
 import unoeste.fipp.ativooperante_be.repositories.OrgaoRepository;
 import unoeste.fipp.ativooperante_be.services.OrgaoService;
 

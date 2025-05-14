@@ -2,7 +2,7 @@ package unoeste.fipp.ativooperante_be.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import unoeste.fipp.ativooperante_be.entities.Tipo;
+import unoeste.fipp.ativooperante_be.domain.entities.Tipo;
 import unoeste.fipp.ativooperante_be.repositories.TipoRepository;
 
 import java.util.List;
