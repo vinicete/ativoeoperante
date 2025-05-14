@@ -11,10 +11,10 @@ import unoeste.fipp.ativooperante_be.domain.entities.Erro;
 import unoeste.fipp.ativooperante_be.domain.entities.FeedBack;
 import unoeste.fipp.ativooperante_be.domain.entities.Tipo;
 import org.springframework.web.bind.annotation.*;
-import unoeste.fipp.ativooperante_be.entities.Denuncia;
-import unoeste.fipp.ativooperante_be.entities.Erro;
-import unoeste.fipp.ativooperante_be.entities.FeedBack;
-import unoeste.fipp.ativooperante_be.entities.Tipo;
+import unoeste.fipp.ativooperante_be.domain.entities.Denuncia;
+import unoeste.fipp.ativooperante_be.domain.entities.Erro;
+import unoeste.fipp.ativooperante_be.domain.entities.FeedBack;
+import unoeste.fipp.ativooperante_be.domain.entities.Tipo;
 import unoeste.fipp.ativooperante_be.services.DenunciaService;
 
 import java.util.List;
