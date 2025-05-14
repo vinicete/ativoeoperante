@@ -2,6 +2,14 @@ package unoeste.fipp.ativooperante_be.restcontrollers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import unoeste.fipp.ativooperante_be.domain.entities.Denuncia;
+import unoeste.fipp.ativooperante_be.domain.entities.Erro;
+import unoeste.fipp.ativooperante_be.domain.entities.FeedBack;
+import unoeste.fipp.ativooperante_be.domain.entities.Tipo;
 import org.springframework.web.bind.annotation.*;
 import unoeste.fipp.ativooperante_be.entities.Denuncia;
 import unoeste.fipp.ativooperante_be.entities.Erro;
