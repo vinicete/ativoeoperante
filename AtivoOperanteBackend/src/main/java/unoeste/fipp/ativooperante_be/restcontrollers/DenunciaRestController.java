@@ -44,4 +44,12 @@ public class DenunciaRestController {
         return ResponseEntity.badRequest().build();
     }
 
+    @GetMapping
+    public ResponseEntity<Object> getDenunciaByUser(@RequestParam(value="userId") Long userId){
+        List<Denuncia> denunciaList = denunciaService.getDenunciasByUser(userId);
+        if(denunciaList.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(denunciaList);
+    }
 }

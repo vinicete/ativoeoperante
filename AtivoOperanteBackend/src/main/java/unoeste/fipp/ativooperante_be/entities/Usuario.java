@@ -1,14 +1,14 @@
 package unoeste.fipp.ativooperante_be.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "usuario")
 public class Usuario {
+    @Id
     @Column(name = "usu_id")
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(name = "usu_cpf")
     private String cpf;
     @Column(name = "usu_email")
@@ -18,5 +18,12 @@ public class Usuario {
     @Column(name = "usu_nivel")
     private int nivel;
 
-    
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }
