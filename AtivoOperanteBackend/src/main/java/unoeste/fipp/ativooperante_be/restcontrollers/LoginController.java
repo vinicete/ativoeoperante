@@ -13,7 +13,7 @@ import unoeste.fipp.ativooperante_be.domain.entities.Erro;
 import unoeste.fipp.ativooperante_be.services.LoginService;
 
 @RestController
-@RequestMapping("apis/login")
+@RequestMapping("api/login")
 public class LoginController {
 
     @Autowired

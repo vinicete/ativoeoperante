@@ -10,7 +10,7 @@ import unoeste.fipp.ativooperante_be.services.TipoService;
 import java.util.List;
 
 @RestController
-@RequestMapping("apis/tipo")
+@RequestMapping("api/tipo")
 public class TipoRestController {
     @Autowired
     private TipoService tipoService;

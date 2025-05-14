@@ -17,11 +17,11 @@ public class JwtUtil {
     static public String getToken(String usuario,String nivel)
     {
         String jwtToken = Jwts.builder()
-                .setSubject("usuario")
+                .setSubject(usuario)
                 .setIssuer("localhost:8080")
                 .claim("nivel", nivel)
                 .setIssuedAt(new Date())
-                .setExpiration(Date.from(LocalDateTime.now().plusMinutes(1L)
+                .setExpiration(Date.from(LocalDateTime.now().plusDays(2L)
                         .atZone(ZoneId.systemDefault()).toInstant()))
                 .signWith(CHAVE)
                 .compact();
@@ -34,10 +34,10 @@ public class JwtUtil {
             Jwts.parserBuilder()
                     .setSigningKey(CHAVE)
                     .build()
-                    .parseClaimsJws(token).getSignature();
+                    .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Invalid token: " + e.getMessage());
         }
         return false;
     }
@@ -58,10 +58,16 @@ public class JwtUtil {
     }
 
     public static String extractUsername(String token) {
-        return Jwts.parser()
-                .setSigningKey(CHAVE)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(CHAVE)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        } catch (Exception e) {
+            System.out.println("Error validating token: " + e.getMessage());
+            return null;
+        }
     }
 }

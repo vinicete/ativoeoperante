@@ -11,7 +11,7 @@ import unoeste.fipp.ativooperante_be.services.DenunciaService;
 import java.util.List;
 
 @RestController
-@RequestMapping("apis/denuncia")
+@RequestMapping("api/denuncia")
 public class DenunciaRestController {
 
     @Autowired

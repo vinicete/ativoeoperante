@@ -25,25 +25,25 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    /*@Bean
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .requestMatchers("/apis/login/signin", "/apis/login/signup").permitAll()
+                .requestMatchers("/apis/login/signin", "/apis/login/signup", "/swagger-ui.html","/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }*/
+    }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception { //pra testar todas as rotas sem auth
-        http.csrf().disable()
-                .authorizeRequests()
-                .anyRequest().permitAll(); // <- libera tudo
-
-        return http.build();}
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception { //pra testar todas as rotas sem auth
+//        http.csrf().disable()
+//                .authorizeRequests()
+//                .anyRequest().permitAll(); // <- libera tudo
+//
+//        return http.build();}
 
     @Bean
     public PasswordEncoder passwordEncoder() {

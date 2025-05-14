@@ -11,7 +11,7 @@ import unoeste.fipp.ativooperante_be.services.OrgaoService;
 import java.util.List;
 
 @RestController
-@RequestMapping("apis/orgao")
+@RequestMapping("api/orgao")
 public class OrgaoRestController {
 
     @Autowired
