@@ -24,18 +24,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .requestMatchers("/apis/login/signin", "/apis/login/signup").permitAll()  // Permite acesso ao login e signup
-                .anyRequest().authenticated()  // Requer autenticação para qualquer outra requisição
-                .and().addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);  // Adiciona o filtro JWT
+                .requestMatchers("/apis/login/signin", "/apis/login/signup").permitAll()  // Permite acesso ao login e signup sem autenticação
+                .anyRequest().authenticated()  // Exige autenticação para qualquer outra requisição
+                .and()
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);  // Adiciona o filtro JWT antes do filtro de autenticação padrão
 
-        return http.build();
-    }
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { //metodo que permite rodar endpoints com / ou /login sem autenticação padrao, mas sim customizada
-        http.csrf().disable()
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                );
         return http.build();
     }
 }

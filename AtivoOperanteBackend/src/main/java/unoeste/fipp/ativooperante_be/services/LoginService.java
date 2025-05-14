@@ -50,17 +50,22 @@ public class LoginService {
     public String signin(SigninDto input) throws Exception {
 
         try {
+            System.out.println("Attempting to authenticate user: " + input.getEmail());
             // Autentica o usuário
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(input.getEmail(), input.getSenha())
             );
+            System.out.println("Authentication successful for user: " + input.getEmail());
 
             var us = usuarioRepository.findByEmail(input.getEmail())
                     .orElseThrow(() -> new Exception("Usuário não encontrado"));
 
             // Se a autenticação for bem-sucedida, gera o token
-            return JwtUtil.getToken(input.getEmail(),String.valueOf(us.getNivel()));
+            String token = JwtUtil.getToken(input.getEmail(), String.valueOf(us.getNivel()));
+            System.out.println("Generated token: " + token);
+            return token;
         } catch (Exception ex) {
+            System.out.println("Error during signin: " + ex.getMessage());
             throw new Exception("Usuário ou senha inválidos");
         }
     }

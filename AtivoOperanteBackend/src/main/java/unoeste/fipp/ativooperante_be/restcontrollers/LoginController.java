@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import unoeste.fipp.ativooperante_be.domain.dtos.login.SigninDto;
 import unoeste.fipp.ativooperante_be.domain.dtos.login.SignupDto;
+import unoeste.fipp.ativooperante_be.domain.dtos.login.TokenDto;
 import unoeste.fipp.ativooperante_be.domain.entities.Erro;
 import unoeste.fipp.ativooperante_be.services.LoginService;
 
@@ -33,12 +34,12 @@ public class LoginController {
     @PostMapping("signin")
     public ResponseEntity<Object> signin(@RequestBody SigninDto req){
         try {
-            loginService.signin(req);
+            String token = loginService.signin(req);
+            return ResponseEntity.ok(new TokenDto(token));
         }
         catch (Exception ex){
-            return null;
+            return ResponseEntity.badRequest().body(new Erro(ex.getMessage()));
         }
-        return null;
 
     }
 }
