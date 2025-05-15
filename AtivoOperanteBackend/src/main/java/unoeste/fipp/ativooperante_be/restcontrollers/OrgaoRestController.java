@@ -27,7 +27,7 @@ public class OrgaoRestController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> save(Orgao orgao){
+    public ResponseEntity<Object> save(@RequestBody Orgao orgao){
         Orgao orgaoAux = orgaoService.salvar(orgao);
         if(orgaoAux!=null){
             return ResponseEntity.ok(orgaoAux);
@@ -36,7 +36,7 @@ public class OrgaoRestController {
     }
 
     @PutMapping
-    public ResponseEntity<Object> update(Orgao orgao){
+    public ResponseEntity<Object> update(@RequestBody Orgao orgao){
         Orgao orgaoAux = orgaoService.salvar(orgao);
         if(orgaoAux!=null){
             return ResponseEntity.ok(orgaoAux);
@@ -45,7 +45,7 @@ public class OrgaoRestController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Object> delete(Orgao orgao){
+    public ResponseEntity<Object> delete(@RequestBody Orgao orgao){
         if(orgaoService.deletar(orgao))
             return ResponseEntity.noContent().build();
         return ResponseEntity.badRequest().build();
