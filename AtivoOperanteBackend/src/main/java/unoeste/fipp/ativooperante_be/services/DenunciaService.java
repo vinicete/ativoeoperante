@@ -17,6 +17,10 @@ public class DenunciaService {
         return denunciaRepository.findAll();
     }
 
+    public Denuncia save(Denuncia denuncia){
+        return denunciaRepository.save(denuncia);
+    }
+
     public boolean addFeedBack(FeedBack feedBack){
         try {
             denunciaRepository.addFeedBack(feedBack.getId(), feedBack.getTexto());

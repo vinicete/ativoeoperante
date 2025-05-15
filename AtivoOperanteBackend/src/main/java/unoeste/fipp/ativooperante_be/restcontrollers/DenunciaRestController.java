@@ -37,6 +37,14 @@ public class DenunciaRestController {
         return ResponseEntity.ok(denunciaList);
     }
 
+    @PostMapping
+    public ResponseEntity<Object> save(@RequestBody Denuncia denuncia) {
+        Denuncia _denuncia = denunciaService.save(denuncia);
+        if(denuncia==null)
+            return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(_denuncia);
+    }
+
     // Adiciona um feedback a uma denúncia
     @PostMapping("/add-feedback/{id}/{texto}")
     public ResponseEntity<Object> addFeedBack(@PathVariable Long id, @PathVariable String texto) {
