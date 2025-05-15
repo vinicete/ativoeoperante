@@ -2,10 +2,14 @@ package unoeste.fipp.ativooperante_be.restcontrollers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import unoeste.fipp.ativooperante_be.domain.entities.Denuncia;
 import unoeste.fipp.ativooperante_be.domain.entities.Erro;
 import unoeste.fipp.ativooperante_be.domain.entities.FeedBack;
+import unoeste.fipp.ativooperante_be.domain.entities.Usuario;
+import unoeste.fipp.ativooperante_be.repositories.UsuarioRepository;
 import unoeste.fipp.ativooperante_be.services.DenunciaService;
 
 import java.util.List;
@@ -16,6 +20,9 @@ public class DenunciaRestController {
 
     @Autowired
     private DenunciaService denunciaService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     // Lista todas as denúncias
     @GetMapping("/all")
@@ -39,8 +46,16 @@ public class DenunciaRestController {
 
     @PostMapping
     public ResponseEntity<Object> save(@RequestBody Denuncia denuncia) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        System.out.println(email);
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        denuncia.setUsuario(usuario);
+
         Denuncia _denuncia = denunciaService.save(denuncia);
-        if(denuncia==null)
+        if(_denuncia==null)
             return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(_denuncia);
     }

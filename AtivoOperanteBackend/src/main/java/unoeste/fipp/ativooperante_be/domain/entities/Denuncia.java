@@ -96,4 +96,8 @@ public class Denuncia {
     public void setFeedBack(FeedBack feedBack) {
         this.feedBack = feedBack;
     }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 }
