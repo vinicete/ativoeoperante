@@ -32,7 +32,24 @@ export default function NewComplaint() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual API call
+      const response = await fetch('/api/denuncia', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          organizationId: selectedOrg,
+          problemTypeId: selectedProblemType,
+          userId: user?.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit complaint');
+      }
+
       console.log({
         title,
         description,

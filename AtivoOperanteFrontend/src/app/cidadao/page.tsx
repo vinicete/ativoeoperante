@@ -2,6 +2,8 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 interface Complaint {
   id: string;
@@ -14,8 +16,38 @@ interface Complaint {
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
-  // TODO: Replace with actual data from API
-  const complaints: Complaint[] = [];
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      if (user) {
+        try {
+          const response = await fetch(`/api/user/${user.id}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch complaints');
+          }
+          const data = await response.json();
+          
+          // Check if data is an array and has the expected structure
+          if (Array.isArray(data)) {
+            setComplaints(data);
+            setError(null);
+          } else {
+            console.error('Invalid data format:', data);
+            setError('Invalid data format received');
+            setComplaints([]);
+          }
+        } catch (err) {
+          console.error('Error fetching complaints:', err);
+          setError('Failed to load complaints');
+          setComplaints([]);
+        }
+      }
+    };
+
+    fetchComplaints();
+  }, [user]);
 
   return (
     <div className="space-y-6">
@@ -42,7 +74,11 @@ export default function CitizenDashboard() {
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              {complaints.length === 0 ? (
+              {error ? (
+                <div className="text-center py-12">
+                  <p className="text-red-500">{error}</p>
+                </div>
+              ) : complaints.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-gray-500">Você ainda não tem denúncias.</p>
                 </div>
