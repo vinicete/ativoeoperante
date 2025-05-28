@@ -14,12 +14,12 @@ export default function CitizenLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || user.role !== 'citizen') {
+    if (!user || user.nivel !== 1) {
       router.push('/');
     }
   }, [user, router]);
 
-  if (!user || user.role !== 'citizen') {
+  if (!user || user.nivel !== 1) {
     return null;
   }
 

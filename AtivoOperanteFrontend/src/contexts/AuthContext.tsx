@@ -20,7 +20,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    }
+    return null;
+  });
 
   const login = async (email: string, senha: string) => {
     // TODO: Implement actual login logic with API
@@ -35,13 +41,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = await response.json();
     if (response.ok) {
       document.cookie = `token=${data.token}; path=/`;
-      setUser({
+      const userData = {
         id: data.usuario.id,
         nome: data.usuario.nome,
         email: data.usuario.email,
         cpf: data.usuario.cpf,
         nivel: data.usuario.nivel
-      });
+      };
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
     } else {
       throw new Error(data.message || 'Login failed');
     }
@@ -59,7 +67,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const data = await response.json();
     if (response.ok) {
-      setUser(data);
+      const userData = {
+        id: data.usuario.id,
+        nome: data.usuario.nome,
+        email: data.usuario.email,
+        cpf: data.usuario.cpf,
+        nivel: data.usuario.nivel
+      };
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
     } else {
       throw new Error(data.message || 'Registration failed');
     }
@@ -67,6 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   };
 
   return (
