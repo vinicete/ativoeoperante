@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, senha: string) => {
     // TODO: Implement actual login logic with API
-    const response = await fetch('http://localhost:3000/api/login/singin', {
+    const response = await fetch('http://localhost:8080/api/login/singin', {
       method: 'POST',
       body: JSON.stringify({ email, senha }),
     });
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (nome: string, email: string, senha: string, cpf: string) => {
     const nivel = 1;
-    const response = await fetch('http://localhost:3000/api/login/singup', {
+    const response = await fetch('http://localhost:8080/api/login/singup', {
       method: 'POST',
       body: JSON.stringify({ nome, email, senha, cpf , nivel}),
     });
