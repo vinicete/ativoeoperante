@@ -4,19 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { Denuncia } from './nova-denuncia/page';
 
-interface Complaint {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'resolved';
-  createdAt: string;
-  feedback?: string;
-}
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [denuncia, setDenuncia] = useState<Denuncia[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,17 +24,17 @@ export default function CitizenDashboard() {
           
           // Check if data is an array and has the expected structure
           if (Array.isArray(data)) {
-            setComplaints(data);
+            setDenuncia(data);
             setError(null);
           } else {
             console.error('Invalid data format:', data);
             setError('Invalid data format received');
-            setComplaints([]);
+            setDenuncia([]);
           }
         } catch (err) {
           console.error('Error fetching complaints:', err);
           setError('Failed to load complaints');
-          setComplaints([]);
+          setDenuncia([]);
         }
       }
     };
@@ -78,7 +71,7 @@ export default function CitizenDashboard() {
                 <div className="text-center py-12">
                   <p className="text-red-500">{error}</p>
                 </div>
-              ) : complaints.length === 0 ? (
+              ) : denuncia.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-gray-500">Você ainda não tem denúncias.</p>
                 </div>
@@ -96,7 +89,7 @@ export default function CitizenDashboard() {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Status
+                        Tipo
                       </th>
                       <th
                         scope="col"
@@ -113,21 +106,19 @@ export default function CitizenDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {complaints.map((complaint) => (
-                      <tr key={complaint.id}>
+                    {denuncia.map((denuncia) => (
+                      <tr key={denuncia.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                          {complaint.title}
+                          {denuncia.titulo}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {complaint.status === 'pending' && 'Pendente'}
-                          {complaint.status === 'in_progress' && 'Em Andamento'}
-                          {complaint.status === 'resolved' && 'Resolvido'}
+                          {denuncia.tipo.nome}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {new Date(complaint.createdAt).toLocaleDateString()}
+                          {new Date(denuncia.data).toLocaleDateString()}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {complaint.feedback || '-'}
+                          {denuncia.feedBack?.texto || '-'}
                         </td>
                       </tr>
                     ))}

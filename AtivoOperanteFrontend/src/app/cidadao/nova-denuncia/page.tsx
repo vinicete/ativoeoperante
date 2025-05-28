@@ -5,20 +5,23 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/contexts/AuthContext';
 
-interface FeedBack {
+export interface FeedBack {
   id: string;
   texto: string;
-  denuncia: Denuncia;
+  denuncia: string;
 }
 
-interface Denuncia {
+export interface Denuncia {
   id: string;
   titulo: string;
   texto: string;
   urgencia: number;
   data: Date;
   userId: string;
-  tipo: string;
+  tipo: {
+    id: string;
+    nome: string;
+  };
   usuario: User;
   feedBack: FeedBack;
 }
@@ -52,21 +55,21 @@ export default function NewComplaint() {
         throw new Error('User not authenticated');
       }
 
-      const denuncia: Denuncia = {
+      const denuncia = {
         id: '',
         titulo: title,
         texto: description,
         urgencia: urgencia,
         data: new Date(),
-        userId: userData.id,
-        tipo: tipo,
+        userId: userData.id.toString(),
+        tipo: {
+          id: tipo,
+          nome: tipos.find(t => t.id === tipo)?.nome || ''
+        },
         usuario: userData,
-        feedBack: {
-          id: '',
-          texto: '',
-          denuncia: {} as Denuncia
-        }
       };
+
+      console.log(denuncia);
 
       const response = await fetch('/api/denuncia', {
         method: 'POST',
@@ -115,7 +118,7 @@ export default function NewComplaint() {
                     name="title"
                     id="title"
                     required
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-gray-700"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
@@ -133,7 +136,7 @@ export default function NewComplaint() {
                     name="description"
                     rows={3}
                     required
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-gray-700"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
@@ -150,7 +153,7 @@ export default function NewComplaint() {
                     id="tipo"
                     name="tipo"
                     required
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="text-gray-700 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     value={tipo}
                     onChange={(e) => setTipo(e.target.value)}
                   >
@@ -174,7 +177,7 @@ export default function NewComplaint() {
                     id="urgencia"
                     name="urgencia"
                     required
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="text-gray-700 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     value={urgencia}
                     onChange={(e) => setUrgencia(Number(e.target.value))}
                   >
