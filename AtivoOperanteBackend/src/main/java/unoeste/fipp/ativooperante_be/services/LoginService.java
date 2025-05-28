@@ -11,6 +11,7 @@ import unoeste.fipp.ativooperante_be.config.JwtUtil;
 import unoeste.fipp.ativooperante_be.domain.dtos.login.SigninDto;
 import unoeste.fipp.ativooperante_be.domain.dtos.login.SignupCompletedDto;
 import unoeste.fipp.ativooperante_be.domain.dtos.login.SignupDto;
+import unoeste.fipp.ativooperante_be.domain.dtos.login.TokenDto;
 import unoeste.fipp.ativooperante_be.domain.entities.Usuario;
 import unoeste.fipp.ativooperante_be.repositories.UsuarioRepository;
 
@@ -47,7 +48,7 @@ public class LoginService {
         }
     }
 
-    public String signin(SigninDto input) throws Exception {
+    public TokenDto signin(SigninDto input) throws Exception {
 
         try {
             System.out.println("Attempting to authenticate user: " + input.getEmail());
@@ -63,7 +64,7 @@ public class LoginService {
             // Se a autenticação for bem-sucedida, gera o token
             String token = JwtUtil.getToken(input.getEmail(), String.valueOf(us.getNivel()));
             System.out.println("Generated token: " + token);
-            return token;
+            return new TokenDto(token, us);
         } catch (Exception ex) {
             System.out.println("Error during signin: " + ex.getMessage());
             throw new Exception("Usuário ou senha inválidos");
