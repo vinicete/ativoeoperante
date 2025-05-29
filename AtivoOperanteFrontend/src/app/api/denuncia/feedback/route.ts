@@ -9,13 +9,22 @@ export async function POST(
 
     const body = await request.json();
 
-    const response = await fetch(`http://localhost:8080/api/denuncia/${body.texto}`, {
+    const denuncia = {
+      id: body.denuncia.id,
+      titulo: body.denuncia.titulo,
+      texto: body.denuncia.texto,
+      urgencia: body.denuncia.urgencia,
+      data: body.denuncia.data,
+      tipo: { id: body.denuncia.tipo.id, nome: body.denuncia.tipo.nome },
+    }
+
+    const response = await fetch(`http://localhost:8080/api/denuncia/add-feedback/${body.texto}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body.denuncia)
+      body: JSON.stringify(denuncia)
     });
 
     if (!response.ok) {
@@ -27,8 +36,7 @@ export async function POST(
       );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json({ message: 'Feedback submitted successfully' });
   } catch (error) {
     console.error('Error submitting feedback:', error);
     return NextResponse.json(
