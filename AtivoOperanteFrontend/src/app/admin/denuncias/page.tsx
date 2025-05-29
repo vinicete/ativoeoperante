@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getDenuncias, deleteDenuncia, addFeedback } from '../../api/admin';
+import { getDenuncias, deleteDenuncia } from '../../api/admin';
 
 interface Denuncia {
   id: number;
@@ -29,24 +29,31 @@ export default function ComplaintsPage() {
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState<{ id: number } | null>(null);
 
   useEffect(() => {
-    fetchDenuncias();
-  }, []);
-
-  const fetchDenuncias = async () => {
-    try {
+    const fetchComplaints = async () => {
       setLoading(true);
-      const data = await getDenuncias();
-      setDenuncias(data);
-      setError(null);
-    } catch (err) {
-      setError('Erro ao carregar denúncias');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const response = await fetch(`/api/denuncia/all`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch complaints');
+        }
+        const data = await response.json();
+        setDenuncias(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching complaints:', err);
+        setError('Failed to load complaints');
+        setDenuncias([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComplaints();
+  }, []);
 
   const handleDelete = async (id: number) => {
     if (!confirm('Tem certeza que deseja excluir esta denúncia?')) return;
@@ -66,23 +73,40 @@ export default function ComplaintsPage() {
     setIsModalOpen(true);
   };
 
-  const handleSubmitFeedback = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFeedbackSubmit = async () => {
     if (!selectedDenuncia) return;
-
+    
+    setIsSubmitting(true);
     try {
-      await addFeedback(selectedDenuncia.id, feedback);
-      setDenuncias(
-        denuncias.map((denuncia) =>
-          denuncia.id === selectedDenuncia.id
-            ? { ...denuncia, feedBack: { texto: feedback } }
-            : denuncia
-        )
+      const response = await fetch(`/api/denuncia/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ texto: feedback, denuncia: selectedDenuncia }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
+      }
+
+      // Update the denuncia list with the new feedback
+      const updatedDenuncia = denuncias.map(d => 
+        d.id === selectedDenuncia.id 
+          ? { ...d, feedBack: { ...d.feedBack, texto: feedback } }
+          : d
       );
+      setDenuncias(updatedDenuncia);
+      
+      // Close modal and reset state
       setIsModalOpen(false);
-    } catch (err) {
-      setError('Erro ao adicionar feedback');
-      console.error(err);
+      setFeedback('');
+      setSelectedDenuncia(null);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      setError('Failed to submit feedback');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -158,13 +182,13 @@ export default function ComplaintsPage() {
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                         {denuncia.titulo}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                         {denuncia.usuario?.nome || 'N/A'}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                         {denuncia.tipo?.nome || 'N/A'}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                         {new Date(denuncia.data).toLocaleDateString()}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
@@ -191,22 +215,17 @@ export default function ComplaintsPage() {
       </div>
 
       {isModalOpen && selectedDenuncia && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+          <div className="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <form onSubmit={handleSubmitFeedback}>
+            <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+              <form onSubmit={handleFeedbackSubmit}>
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div>
                     <label
                       htmlFor="feedback"
-                      className="block text-sm font-medium text-gray-700"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Feedback
                     </label>
@@ -214,9 +233,10 @@ export default function ComplaintsPage() {
                       id="feedback"
                       name="feedback"
                       rows={3}
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-gray-900"
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
+                      placeholder="Digite seu feedback aqui..."
                     />
                   </div>
                 </div>
@@ -230,7 +250,7 @@ export default function ComplaintsPage() {
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     Cancelar
                   </button>

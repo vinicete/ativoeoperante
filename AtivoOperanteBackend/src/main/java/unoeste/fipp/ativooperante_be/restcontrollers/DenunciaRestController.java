@@ -28,7 +28,7 @@ public class DenunciaRestController {
     // Lista todas as denúncias
     @GetMapping("/all")
     public ResponseEntity<Object> getAll() {
-        List<Denuncia> denunciaList = denunciaService.getAll();
+        List<DenunciaDTO> denunciaList = denunciaService.getAll();
         if (!denunciaList.isEmpty())
             return ResponseEntity.ok(denunciaList);
         else

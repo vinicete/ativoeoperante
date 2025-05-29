@@ -15,9 +15,25 @@ import java.util.List;
 public class DenunciaService {
     @Autowired
     private DenunciaRepository denunciaRepository;
-    public List<Denuncia> getAll()
+    public List<DenunciaDTO> getAll()
     {
-        return denunciaRepository.findAll();
+        List<Denuncia> denunciaList = denunciaRepository.findAll();
+        List<DenunciaDTO> denunciaDtosList = new ArrayList<>();
+        for(Denuncia d : denunciaList) {
+            FeedBackDto feedBack = null;
+
+            if (d.getFeedBack() != null) {
+                feedBack = new FeedBackDto(d.getFeedBack().getTexto(), d.getFeedBack().getDenuncia().getId());
+
+                if (feedBack.getTexto() == null || feedBack.getTexto().isEmpty()) {
+                    feedBack = null;
+                }
+            }
+
+            DenunciaDTO denunciaDTO = new DenunciaDTO(d.getId(), d.getTitulo(), d.getTexto(), d.getUrgencia(), d.getData(), d.getTipo(), feedBack);
+            denunciaDtosList.add(denunciaDTO);
+        }
+        return denunciaDtosList;
     }
 
     public Denuncia save(Denuncia denuncia){

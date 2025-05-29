@@ -118,13 +118,3 @@ export const deleteDenuncia = async (id: number) => {
   if (!response.ok) throw new Error('Failed to delete denúncia');
   // No need to parse JSON for successful DELETE operations
 };
-
-export const addFeedback = async (denunciaId: number, texto: string) => {
-  const response = await fetch(`${API_URL}/denuncia/add-feedback/${encodeURIComponent(texto)}`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({ id: denunciaId }),
-  });
-  if (!response.ok) throw new Error('Failed to add feedback');
-  return response.json();
-}; 
