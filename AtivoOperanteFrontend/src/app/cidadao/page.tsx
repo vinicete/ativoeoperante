@@ -6,11 +6,14 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import { Denuncia } from './nova-denuncia/page';
 
-
 export default function CitizenDashboard() {
   const { user } = useAuth();
   const [denuncia, setDenuncia] = useState<Denuncia[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDenuncia, setSelectedDenuncia] = useState<Denuncia | null>(null);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -22,7 +25,6 @@ export default function CitizenDashboard() {
           }
           const data = await response.json();
           
-          // Check if data is an array and has the expected structure
           if (Array.isArray(data)) {
             setDenuncia(data);
             setError(null);
@@ -41,6 +43,43 @@ export default function CitizenDashboard() {
 
     fetchComplaints();
   }, [user]);
+
+  const handleFeedbackSubmit = async () => {
+    if (!selectedDenuncia) return;
+    
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/denuncia/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ texto: feedbackText , denuncia: selectedDenuncia}),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
+      }
+
+      // Update the denuncia list with the new feedback
+      const updatedDenuncia = denuncia.map(d => 
+        d.id === selectedDenuncia.id 
+          ? { ...d, feedBack: { ...d.feedBack, texto: feedbackText } }
+          : d
+      );
+      setDenuncia(updatedDenuncia);
+      
+      // Close modal and reset state
+      setIsModalOpen(false);
+      setFeedbackText('');
+      setSelectedDenuncia(null);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      setError('Failed to submit feedback');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -103,6 +142,12 @@ export default function CitizenDashboard() {
                       >
                         Feedback
                       </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Ações
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -120,6 +165,17 @@ export default function CitizenDashboard() {
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {denuncia.feedBack?.texto || '-'}
                         </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <button
+                            onClick={() => {
+                              setSelectedDenuncia(denuncia);
+                              setIsModalOpen(true);
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Adicionar Feedback
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -129,6 +185,42 @@ export default function CitizenDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Adicionar Feedback
+            </h3>
+            <textarea
+              className="w-full h-32 p-2 border border-gray-300 rounded-md text-gray-700"
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+              placeholder="Digite seu feedback aqui..."
+            />
+            <div className="mt-4 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setFeedbackText('');
+                  setSelectedDenuncia(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleFeedbackSubmit}
+                disabled={isSubmitting}
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50"
+              >
+                {isSubmitting ? 'Enviando...' : 'Enviar Feedback'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

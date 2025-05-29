@@ -15,13 +15,9 @@ public class FeedBack {
     @JoinColumn(name = "den_id", unique = true)
     private Denuncia denuncia;
 
-    public FeedBack(Long id, String texto) {
-        Id = id;
+    public FeedBack( String texto, Denuncia denuncia) {
         this.texto = texto;
-    }
-
-    public FeedBack() {
-        this(0L,"");
+        this.denuncia = denuncia;
     }
 
     public Long getId() {
@@ -38,5 +34,13 @@ public class FeedBack {
 
     public void setTexto(String texto) {
         this.texto = texto;
+    }
+
+    public Denuncia getDenuncia() {
+        return denuncia;
+    }
+
+    public void setDenuncia(Denuncia denuncia) {
+        this.denuncia = denuncia;
     }
 }

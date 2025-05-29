@@ -61,9 +61,9 @@ public class DenunciaRestController {
     }
 
     // Adiciona um feedback a uma denúncia
-    @PostMapping("/add-feedback/{id}/{texto}")
-    public ResponseEntity<Object> addFeedBack(@PathVariable Long id, @PathVariable String texto) {
-        if (denunciaService.addFeedBack(new FeedBack(id, texto)))
+    @PostMapping("/add-feedback/{texto}")
+    public ResponseEntity<Object> addFeedBack( @PathVariable String texto, @RequestBody Denuncia denuncia) {
+        if (denunciaService.addFeedBack(new FeedBack(texto, denuncia)))
             return ResponseEntity.noContent().build();
         else
             return ResponseEntity.badRequest().body("Não foi possível adicionar o feedback");

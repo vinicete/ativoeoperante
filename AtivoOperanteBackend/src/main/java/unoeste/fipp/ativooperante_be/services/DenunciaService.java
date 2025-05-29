@@ -23,7 +23,7 @@ public class DenunciaService {
 
     public boolean addFeedBack(FeedBack feedBack){
         try {
-            denunciaRepository.addFeedBack(feedBack.getId(), feedBack.getTexto());
+            denunciaRepository.addFeedBack(feedBack.getDenuncia().getId(), feedBack.getTexto());
             return true;
         }
         catch (Exception e){
