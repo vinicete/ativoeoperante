@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function AdminLayout({
@@ -12,14 +12,27 @@ export default function AdminLayout({
 }) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user.role !== 'admin') {
+    if (user === null) {
       router.push('/');
+    } else if (user.nivel !== 2) {
+      router.push('/');
+    } else {
+      setIsLoading(false);
     }
   }, [user, router]);
 
-  if (!user || user.role !== 'admin') {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg text-gray-600">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!user || user.nivel !== 2) {
     return null;
   }
 
@@ -30,7 +43,7 @@ export default function AdminLayout({
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold">Painel Administrativo</h1>
+                <h1 className="text-xl font-bold text-indigo-500">Painel Administrativo</h1>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <Link

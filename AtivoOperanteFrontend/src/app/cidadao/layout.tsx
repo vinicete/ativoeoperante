@@ -14,12 +14,12 @@ export default function CitizenLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || user.role !== 'citizen') {
+    if (!user || user.nivel !== 1) {
       router.push('/');
     }
   }, [user, router]);
 
-  if (!user || user.role !== 'citizen') {
+  if (!user || user.nivel !== 1) {
     return null;
   }
 
@@ -30,7 +30,7 @@ export default function CitizenLayout({
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold">Área do Cidadão</h1>
+                <h1 className="text-xl font-bold text-indigo-600">Área do Cidadão</h1>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <Link

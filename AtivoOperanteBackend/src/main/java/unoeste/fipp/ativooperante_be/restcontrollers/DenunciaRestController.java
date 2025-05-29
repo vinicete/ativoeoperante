@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import unoeste.fipp.ativooperante_be.domain.dtos.denuncia.DenunciaDTO;
 import unoeste.fipp.ativooperante_be.domain.entities.Denuncia;
 import unoeste.fipp.ativooperante_be.domain.entities.Erro;
 import unoeste.fipp.ativooperante_be.domain.entities.FeedBack;
@@ -27,7 +28,7 @@ public class DenunciaRestController {
     // Lista todas as denúncias
     @GetMapping("/all")
     public ResponseEntity<Object> getAll() {
-        List<Denuncia> denunciaList = denunciaService.getAll();
+        List<DenunciaDTO> denunciaList = denunciaService.getAll();
         if (!denunciaList.isEmpty())
             return ResponseEntity.ok(denunciaList);
         else
@@ -37,7 +38,7 @@ public class DenunciaRestController {
     // Lista denúncias por usuário
     @GetMapping
     public ResponseEntity<Object> getDenunciaByUser(@RequestParam(value = "userId") Long userId) {
-        List<Denuncia> denunciaList = denunciaService.getDenunciasByUser(userId);
+        List<DenunciaDTO> denunciaList = denunciaService.getDenunciasByUser(userId);
         if (denunciaList.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -61,9 +62,9 @@ public class DenunciaRestController {
     }
 
     // Adiciona um feedback a uma denúncia
-    @PostMapping("/add-feedback/{id}/{texto}")
-    public ResponseEntity<Object> addFeedBack(@PathVariable Long id, @PathVariable String texto) {
-        if (denunciaService.addFeedBack(new FeedBack(id, texto)))
+    @PostMapping("/add-feedback/{texto}")
+    public ResponseEntity<Object> addFeedBack( @PathVariable String texto, @RequestBody Denuncia denuncia) {
+        if (denunciaService.addFeedBack(new FeedBack(texto, denuncia)))
             return ResponseEntity.noContent().build();
         else
             return ResponseEntity.badRequest().body("Não foi possível adicionar o feedback");

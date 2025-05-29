@@ -34,8 +34,8 @@ public class LoginController {
     @PostMapping("signin")
     public ResponseEntity<Object> signin(@RequestBody SigninDto req){
         try {
-            String token = loginService.signin(req);
-            return ResponseEntity.ok(new TokenDto(token));
+            TokenDto token = loginService.signin(req);
+            return ResponseEntity.ok(token);
         }
         catch (Exception ex){
             return ResponseEntity.badRequest().body(new Erro(ex.getMessage()));

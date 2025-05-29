@@ -1,14 +1,13 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-interface User {
+export interface User {
   id: string;
-  name: string;
+  nome: string;
   email: string;
   cpf: string;
-  password: string;
-  role: 1 | 2;
+  nivel: 1 | 2;
 }
 
 interface AuthContextType {
@@ -22,40 +21,77 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setIsInitialized(true);
+  }, []);
 
   const login = async (email: string, senha: string) => {
-    // TODO: Implement actual login logic with API
-    const response = await fetch('http://localhost:8080/api/login/singin', {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ email, senha }),
     });
-    const data = await response.json();
 
+    const data = await response.json();
     if (response.ok) {
-      setUser(data);
+      document.cookie = `token=${data.token}; path=/`;
+      const userData = {
+        id: data.usuario.id,
+        nome: data.usuario.nome,
+        email: data.usuario.email,
+        cpf: data.usuario.cpf,
+        nivel: data.usuario.nivel
+      };
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
     } else {
-      throw new Error('Login failed');
+      throw new Error(data.message || 'Login failed');
     }
   };
 
   const register = async (nome: string, email: string, senha: string, cpf: string) => {
     const nivel = 1;
-    const response = await fetch('http://localhost:8080/api/login/singup', {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ nome, email, senha, cpf , nivel}),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nome, email, senha, cpf, nivel }),
     });
-    const data = await response.json();
 
+    const data = await response.json();
     if (response.ok) {
-      setUser(data);
+      const userData = {
+        id: data.usuario.id,
+        nome: data.usuario.nome,
+        email: data.usuario.email,
+        cpf: data.usuario.cpf,
+        nivel: data.usuario.nivel
+      };
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
     } else {
-      throw new Error('Registration failed');
+      throw new Error(data.message || 'Registration failed');
     }
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   };
+
+  if (!isInitialized) {
+    return null; // or a loading spinner
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>

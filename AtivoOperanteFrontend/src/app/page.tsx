@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,7 +11,18 @@ export default function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [cpf, setCpf] = useState('');
-  const { login, register } = useAuth();
+  const { login, register, user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      if (user.nivel === 1) {
+        router.push('/cidadao');
+      } else if (user.nivel === 2) {
+        router.push('/admin');
+      }
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

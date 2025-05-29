@@ -1,17 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { User } from '@/contexts/AuthContext';
 
-interface ProblemType {
+export interface FeedBack {
   id: string;
-  name: string;
+  texto: string;
+  denuncia: string;
 }
 
-interface Organization {
+export interface Denuncia {
   id: string;
-  name: string;
+  titulo: string;
+  texto: string;
+  urgencia: number;
+  data: Date;
+  userId: string;
+  tipo: {
+    id: string;
+    nome: string;
+  };
+  usuario: User;
+  feedBack: FeedBack;
 }
 
 export default function NewComplaint() {
@@ -19,27 +31,57 @@ export default function NewComplaint() {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedOrg, setSelectedOrg] = useState('');
-  const [selectedProblemType, setSelectedProblemType] = useState('');
+  const [tipo, setTipo] = useState('');
+  const [urgencia, setUrgencia] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tipos, setTipos] = useState<Array<{ id: string; nome: string }>>([]);
+  const {user: userData} = useAuth();
 
-  // TODO: Replace with actual data from API
-  const organizations: Organization[] = [];
-  const problemTypes: ProblemType[] = [];
+  useEffect(() => {
+    const fetchTipos = async () => {
+      const response = await fetch('/api/tipo');
+      const data = await response.json();
+      setTipos(data);
+    };
+    fetchTipos();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual API call
-      console.log({
-        title,
-        description,
-        organizationId: selectedOrg,
-        problemTypeId: selectedProblemType,
-        userId: user?.id,
+      if (!userData) {
+        throw new Error('User not authenticated');
+      }
+
+      const denuncia = {
+        id: '',
+        titulo: title,
+        texto: description,
+        urgencia: urgencia,
+        data: new Date(),
+        userId: userData.id.toString(),
+        tipo: {
+          id: tipo,
+          nome: tipos.find(t => t.id === tipo)?.nome || ''
+        },
+        usuario: userData,
+      };
+
+      console.log(denuncia);
+
+      const response = await fetch('/api/denuncia', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(denuncia),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit complaint');
+      }
 
       router.push('/cidadao');
     } catch (error) {
@@ -76,7 +118,7 @@ export default function NewComplaint() {
                     name="title"
                     id="title"
                     required
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-gray-700"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
@@ -94,7 +136,7 @@ export default function NewComplaint() {
                     name="description"
                     rows={3}
                     required
-                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                    className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-gray-700"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
@@ -102,23 +144,23 @@ export default function NewComplaint() {
 
                 <div>
                   <label
-                    htmlFor="organization"
+                    htmlFor="tipo"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Órgão Responsável
+                    Tipo da Denúncia
                   </label>
                   <select
-                    id="organization"
-                    name="organization"
+                    id="tipo"
+                    name="tipo"
                     required
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    value={selectedOrg}
-                    onChange={(e) => setSelectedOrg(e.target.value)}
+                    className="text-gray-700 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    value={tipo}
+                    onChange={(e) => setTipo(e.target.value)}
                   >
-                    <option value="">Selecione um órgão</option>
-                    {organizations.map((org) => (
-                      <option key={org.id} value={org.id}>
-                        {org.name}
+                    <option value="">Selecione um tipo</option>
+                    {tipos.map((tipo) => (
+                      <option key={tipo.id} value={tipo.id}>
+                        {tipo.nome}
                       </option>
                     ))}
                   </select>
@@ -126,25 +168,22 @@ export default function NewComplaint() {
 
                 <div>
                   <label
-                    htmlFor="problemType"
+                    htmlFor="urgencia"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Tipo do Problema
+                    Nível de Urgência
                   </label>
                   <select
-                    id="problemType"
-                    name="problemType"
+                    id="urgencia"
+                    name="urgencia"
                     required
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    value={selectedProblemType}
-                    onChange={(e) => setSelectedProblemType(e.target.value)}
+                    className="text-gray-700 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    value={urgencia}
+                    onChange={(e) => setUrgencia(Number(e.target.value))}
                   >
-                    <option value="">Selecione um tipo</option>
-                    {problemTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
+                    <option value={1}>Baixa</option>
+                    <option value={2}>Média</option>
+                    <option value={3}>Alta</option>
                   </select>
                 </div>
               </div>
