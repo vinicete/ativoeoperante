@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function AdminLayout({
@@ -12,14 +12,27 @@ export default function AdminLayout({
 }) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user.role !== 'admin') {
+    if (user === null) {
       router.push('/');
+    } else if (user.nivel !== 2) {
+      router.push('/');
+    } else {
+      setIsLoading(false);
     }
   }, [user, router]);
 
-  if (!user || user.role !== 'admin') {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg text-gray-600">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!user || user.nivel !== 2) {
     return null;
   }
 

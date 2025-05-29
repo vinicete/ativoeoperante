@@ -1,66 +1,106 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getDenuncias, deleteDenuncia, addFeedback } from '../../api/admin';
 
-interface Complaint {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'resolved';
-  createdAt: string;
-  userId: string;
-  userName: string;
-  organizationId: string;
-  organizationName: string;
-  problemTypeId: string;
-  problemTypeName: string;
-  feedback?: string;
+interface Denuncia {
+  id: number;
+  titulo: string;
+  texto: string;
+  urgencia: number;
+  data: string;
+  usuario: {
+    id: number;
+    nome: string;
+  } | null;
+  tipo: {
+    id: number;
+    nome: string;
+  } | null;
+  feedBack?: {
+    texto: string;
+  } | null;
 }
 
 export default function ComplaintsPage() {
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
+  const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
+  const [selectedDenuncia, setSelectedDenuncia] = useState<Denuncia | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
-  const [status, setStatus] = useState<'pending' | 'in_progress' | 'resolved'>('pending');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleStatusChange = async (complaintId: string, newStatus: 'pending' | 'in_progress' | 'resolved') => {
-    // TODO: Implement actual API call
-    setComplaints(
-      complaints.map((complaint) =>
-        complaint.id === complaintId
-          ? { ...complaint, status: newStatus }
-          : complaint
-      )
-    );
+  useEffect(() => {
+    fetchDenuncias();
+  }, []);
+
+  const fetchDenuncias = async () => {
+    try {
+      setLoading(true);
+      const data = await getDenuncias();
+      setDenuncias(data);
+      setError(null);
+    } catch (err) {
+      setError('Erro ao carregar denúncias');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = async (id: string) => {
-    // TODO: Implement actual API call
-    setComplaints(complaints.filter((complaint) => complaint.id !== id));
+  const handleDelete = async (id: number) => {
+    if (!confirm('Tem certeza que deseja excluir esta denúncia?')) return;
+
+    try {
+      await deleteDenuncia(id);
+      setDenuncias(denuncias.filter((denuncia) => denuncia.id !== id));
+    } catch (err) {
+      setError('Erro ao excluir denúncia');
+      console.error(err);
+    }
   };
 
-  const handleOpenFeedbackModal = (complaint: Complaint) => {
-    setSelectedComplaint(complaint);
-    setFeedback(complaint.feedback || '');
-    setStatus(complaint.status);
+  const handleOpenFeedbackModal = (denuncia: Denuncia) => {
+    setSelectedDenuncia(denuncia);
+    setFeedback(denuncia.feedBack?.texto || '');
     setIsModalOpen(true);
   };
 
   const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedComplaint) return;
+    if (!selectedDenuncia) return;
 
-    // TODO: Implement actual API call
-    setComplaints(
-      complaints.map((complaint) =>
-        complaint.id === selectedComplaint.id
-          ? { ...complaint, feedback, status }
-          : complaint
-      )
-    );
-    setIsModalOpen(false);
+    try {
+      await addFeedback(selectedDenuncia.id, feedback);
+      setDenuncias(
+        denuncias.map((denuncia) =>
+          denuncia.id === selectedDenuncia.id
+            ? { ...denuncia, feedBack: { texto: feedback } }
+            : denuncia
+        )
+      );
+      setIsModalOpen(false);
+    } catch (err) {
+      setError('Erro ao adicionar feedback');
+      console.error(err);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg text-gray-600">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -96,19 +136,7 @@ export default function ComplaintsPage() {
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Órgão
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
                       Tipo
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Status
                     </th>
                     <th
                       scope="col"
@@ -125,48 +153,29 @@ export default function ComplaintsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {complaints.map((complaint) => (
-                    <tr key={complaint.id}>
+                  {denuncias.map((denuncia) => (
+                    <tr key={denuncia.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                        {complaint.title}
+                        {denuncia.titulo}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {complaint.userName}
+                        {denuncia.usuario?.nome || 'N/A'}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {complaint.organizationName}
+                        {denuncia.tipo?.nome || 'N/A'}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {complaint.problemTypeName}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <select
-                          value={complaint.status}
-                          onChange={(e) =>
-                            handleStatusChange(
-                              complaint.id,
-                              e.target.value as 'pending' | 'in_progress' | 'resolved'
-                            )
-                          }
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        >
-                          <option value="pending">Pendente</option>
-                          <option value="in_progress">Em Andamento</option>
-                          <option value="resolved">Resolvido</option>
-                        </select>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(complaint.createdAt).toLocaleDateString()}
+                        {new Date(denuncia.data).toLocaleDateString()}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <button
-                          onClick={() => handleOpenFeedbackModal(complaint)}
+                          onClick={() => handleOpenFeedbackModal(denuncia)}
                           className="text-indigo-600 hover:text-indigo-900 mr-4"
                         >
                           Feedback
                         </button>
                         <button
-                          onClick={() => handleDelete(complaint.id)}
+                          onClick={() => handleDelete(denuncia.id)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Excluir
@@ -181,7 +190,7 @@ export default function ComplaintsPage() {
         </div>
       </div>
 
-      {isModalOpen && selectedComplaint && (
+      {isModalOpen && selectedDenuncia && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div
@@ -194,27 +203,6 @@ export default function ComplaintsPage() {
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleSubmitFeedback}>
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <div className="mb-4">
-                    <label
-                      htmlFor="status"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Status
-                    </label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={status}
-                      onChange={(e) =>
-                        setStatus(e.target.value as 'pending' | 'in_progress' | 'resolved')
-                      }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    >
-                      <option value="pending">Pendente</option>
-                      <option value="in_progress">Em Andamento</option>
-                      <option value="resolved">Resolvido</option>
-                    </select>
-                  </div>
                   <div>
                     <label
                       htmlFor="feedback"
