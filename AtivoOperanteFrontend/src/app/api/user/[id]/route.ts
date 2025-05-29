@@ -19,8 +19,6 @@ export async function GET(
         'Content-Type': 'application/json',
       }
     });
-
-    console.log('Backend response status:', response.status);
     
     if (!response.ok) {
       const errorData = await response.text();
@@ -31,21 +29,9 @@ export async function GET(
       );
     }
 
-    // Handle 204 No Content response
-    if (response.status === 204) {
-      return NextResponse.json([], { status: 200 });
-    }
-
     const data = await response.json();
-    console.log('Backend success response type:', typeof data);
-    console.log('Backend success response:', data);
-    
-    if (!Array.isArray(data)) {
-      console.error('Backend response is not an array:', data);
-      return NextResponse.json([], { status: 200 });
-    }
-
     return NextResponse.json(data, { status: response.status });
+    
   } catch (error) {
     console.error('User API (get complaints) error:', error);
     return NextResponse.json(
